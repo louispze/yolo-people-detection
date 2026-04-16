@@ -132,13 +132,18 @@
 // Données statiques (température, lumières)
 // ------------------------------------------------------------------
 const rooms = [
-  { id: 'salon',    name: 'Salon',         icon: '🛋', temp: 22.8, target: 22.0, people: 0 },
-  { id: 'chambre1', name: 'Chambre 1',     icon: '🛏', temp: 19.4, target: 20.0, people: 0 },
-  { id: 'chambre2', name: 'Chambre 2',     icon: '🛏', temp: 18.9, target: 19.0, people: 0 },
-  { id: 'cuisine',  name: 'Cuisine',       icon: '🍳', temp: 21.3, target: 21.0, people: 0 },
-  { id: 'bureau',   name: 'Bureau',        icon: '💻', temp: 20.1, target: 20.0, people: 0 },
-  { id: 'sdb',      name: 'Salle de bain', icon: '🚿', temp: 23.5, target: 23.0, people: 0 },
+  { id: 'salon',    name: 'Salon',         icon: '🛋', temp: 22.8, baseTarget: 22.0, target: 22.0, people: 0 },
+  { id: 'chambre1', name: 'Chambre 1',     icon: '🛏', temp: 19.4, baseTarget: 20.0, target: 20.0, people: 0 },
+  { id: 'chambre2', name: 'Chambre 2',     icon: '🛏', temp: 18.9, baseTarget: 19.0, target: 19.0, people: 0 },
+  { id: 'cuisine',  name: 'Cuisine',       icon: '🍳', temp: 21.3, baseTarget: 21.0, target: 21.0, people: 0 },
+  { id: 'bureau',   name: 'Bureau',        icon: '💻', temp: 20.1, baseTarget: 20.0, target: 20.0, people: 0 },
+  { id: 'sdb',      name: 'Salle de bain', icon: '🚿', temp: 23.5, baseTarget: 23.0, target: 23.0, people: 0 },
 ];
+
+// -1°C toutes les 3 personnes (ex: 3 pers → -1°, 6 pers → -2°)
+function computeTarget(room) {
+  return room.baseTarget - Math.floor(room.people / 3);
+}
 
 const lights = [
   { name: 'Lampe salon',    on: true,  sub: '70%' },
@@ -202,6 +207,8 @@ function updatePeople(data) {
   for (const room of rooms) {
     if (data[room.id] !== undefined) {
       room.people = data[room.id];
+      // Recalcule la consigne automatiquement
+      room.target = computeTarget(room);
     }
   }
   render();
@@ -231,8 +238,9 @@ function render() {
       <div class="thermostat-ctrl">
         <button class="thermo-btn" onclick="changeTarget('${r.id}', -0.5)">−</button>
         <div style="text-align:center;">
-          <div class="thermo-label">Consigne</div>
+          <div class="thermo-label">Consigne${r.people >= 3 ? ' 🤖' : ''}</div>
           <div class="thermo-val">${r.target.toFixed(1)}°C</div>
+          ${r.people >= 3 ? `<div style="font-size:9px;color:#888;">base ${r.baseTarget.toFixed(1)}° −${Math.floor(r.people/3)}°</div>` : ''}
         </div>
         <button class="thermo-btn" onclick="changeTarget('${r.id}', 0.5)">+</button>
       </div>
@@ -269,7 +277,10 @@ function render() {
 
 window.changeTarget = (id, delta) => {
   const r = rooms.find(r => r.id === id);
-  if (r) r.target += delta;
+  if (r) {
+    r.baseTarget += delta;           // ajuste la base manuelle
+    r.target = computeTarget(r);     // recalcule avec la nouvelle base
+  }
   render();
 };
 
