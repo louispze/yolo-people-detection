@@ -31,12 +31,9 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        # npm install (et NON npm ci) pour que les binaires natifs Rollup/esbuild
+        # soient résolus pour Linux (évite le bug "Cannot find @rollup/rollup-linux-*").
+        run: npm install --no-audit --no-fund
 
       - name: Build web app (Vite)
         run: npm run build

@@ -6,3 +6,4 @@ ios/
 *.local
 .DS_Store
 *.tsbuildinfo
+package-lock.json
