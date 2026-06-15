@@ -185,7 +185,7 @@ export const useStore = create<AppState>((set, get) => {
     people: persisted.people ?? seedPeople(),
     lights: persisted.lights ?? seedLights(),
     climate: persisted.climate ?? DEFAULT_CLIMATE,
-    connection: persisted.connection ?? { host: "192.168.1.44", port: 8000, useTls: false },
+    connection: persisted.connection ?? { host: "10.42.0.1", port: 8000, useTls: false },
     demoMode: persisted.demoMode ?? true,
 
     screen: "dashboard",

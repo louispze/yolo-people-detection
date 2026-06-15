@@ -87,6 +87,7 @@ function RoomCard({
           marginTop: "auto",
           paddingTop: 12,
           borderTop: "1px solid var(--border)",
+          alignItems: "center",
         }}
         onClick={(e) => e.stopPropagation()}
       >

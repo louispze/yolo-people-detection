@@ -1,5 +1,5 @@
 // Composants UI réutilisables (design-system).
-import { useEffect, type ReactNode } from "react";
+import { useEffect, type ReactNode, type CSSProperties } from "react";
 import { X } from "lucide-react";
 
 export function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
@@ -31,13 +31,21 @@ export function Slider({
 export function Stepper({
   value, step, suffix = "", onChange,
 }: { value: number; step: number; suffix?: string; onChange: (delta: number) => void }) {
+  const btn: CSSProperties = {
+    fontSize: 22, lineHeight: 1, fontWeight: 600, flex: "0 0 auto",
+  };
   return (
-    <div className="row" style={{ gap: 8 }}>
-      <button className="icon-btn" onClick={() => onChange(-step)}>−</button>
-      <div style={{ minWidth: 64, textAlign: "center", fontWeight: 700 }}>
+    <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+      <button className="icon-btn" style={btn} onClick={() => onChange(-step)}>−</button>
+      <div
+        style={{
+          minWidth: 56, textAlign: "center", fontWeight: 700,
+          fontSize: 15, lineHeight: 1,
+        }}
+      >
         {value.toFixed(1)}{suffix}
       </div>
-      <button className="icon-btn" onClick={() => onChange(step)}>+</button>
+      <button className="icon-btn" style={btn} onClick={() => onChange(step)}>+</button>
     </div>
   );
 }
