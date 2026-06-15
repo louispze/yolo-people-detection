@@ -14,6 +14,9 @@ jobs:
   build-apk:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write   # nécessaire pour publier l'APK en release
+
     defaults:
       run:
         working-directory: mobile
@@ -71,3 +74,13 @@ jobs:
           name: app-debug
           path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      # Publie l'APK comme release publique "latest" -> URL directe sans auth :
+      # https://github.com/<user>/<repo>/releases/download/latest/app-debug.apk
+      - name: Publish APK to "latest" release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Derniere APK (debug)
+          prerelease: true
+          files: mobile/android/app/build/outputs/apk/debug/app-debug.apk
