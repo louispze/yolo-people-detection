@@ -1,0 +1,10 @@
+# ByteTrack — réglage "présence stable en intérieur"
+# Basé sur bytetrack.yaml d'Ultralytics, ajusté pour un comptage qui ne
+# saute pas quand une personne bouge/lève la main/est brièvement occultée.
+tracker_type: bytetrack
+track_high_thresh: 0.25   # 1re association
+track_low_thresh: 0.10    # 2e passe : récupère les détections faibles (flou, mouvement)
+new_track_thresh: 0.30    # un peu plus haut → moins de faux nouveaux IDs dus au bruit
+track_buffer: 90          # garde un ID "perdu" ~3 s (à 30 fps) avant de l'oublier
+match_thresh: 0.80
+fuse_score: True

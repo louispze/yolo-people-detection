@@ -3,6 +3,11 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Modèles (poids volumineux, se re-téléchargent / se ré-exportent)
+*.pt
+*_ncnn_model/
+pi/models/
+
 # C extensions
 *.so
 

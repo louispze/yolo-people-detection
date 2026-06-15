@@ -17,7 +17,8 @@ import threading
 import time
 import cv2
 import websockets
-from ultralytics import YOLO
+
+from analyzer import PeopleAnalyzer
 
 # ------------------------------------------------------------------
 # CONFIG – adapte les sources caméra à ton setup
@@ -38,22 +39,28 @@ ROOMS = [
 # source = "video.mp4" → fichier de test
 # source = None      → pas de caméra, compte restera à 0
 
-MODEL_PATH = "yolov8n.pt"   # téléchargé automatiquement si absent
-CONFIDENCE = 0.4
+MODEL_PATH = "yolo11n-pose.pt"   # modèle pose : comptage + activité en une passe
+IMG_SIZE   = 640                 # baisser à 480/320 sur Raspberry Pi
 WS_PORT    = 8765
-FPS_CAP    = 5              # frames analysées / seconde par caméra
+FPS_CAP    = 5                   # frames analysées / seconde par caméra
 
 # ------------------------------------------------------------------
 # État partagé (thread-safe via lock)
 # ------------------------------------------------------------------
 state_lock = threading.Lock()
-people_state = {r["id"]: 0 for r in ROOMS}   # { room_id: count }
+people_state = {r["id"]: 0 for r in ROOMS}    # { room_id: count }
+activity_state = {r["id"]: 0 for r in ROOMS}  # { room_id: nb personnes actives }
+workout_state = {r["id"]: 0 for r in ROOMS}   # { room_id: nb personnes faisant un exercice }
 
 # ------------------------------------------------------------------
 # Thread de détection par pièce
 # ------------------------------------------------------------------
-def detection_thread(room: dict, model: YOLO):
-    """Tourne en continu pour une pièce, met à jour people_state."""
+def detection_thread(room: dict):
+    """Tourne en continu pour une pièce, met à jour people_state/activity_state.
+
+    Chaque pièce a SON propre PeopleAnalyzer : le tracking garde un état par
+    caméra (IDs, historique des keypoints), il ne doit pas être partagé.
+    """
     room_id = room["id"]
     source  = room["source"]
 
@@ -66,6 +73,7 @@ def detection_thread(room: dict, model: YOLO):
         print(f"[WARN] {room['name']} : impossible d'ouvrir source={source}. Compte = 0.")
         return
 
+    analyzer = PeopleAnalyzer(model_path=MODEL_PATH, imgsz=IMG_SIZE)
     print(f"[OK] {room['name']} : caméra ouverte (source={source})")
     interval = 1.0 / FPS_CAP
 
@@ -77,11 +85,12 @@ def detection_thread(room: dict, model: YOLO):
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
 
-        results = model(frame, classes=[0], conf=CONFIDENCE, verbose=False)[0]
-        count   = len(results.boxes)
+        result = analyzer.process(frame)
 
         with state_lock:
-            people_state[room_id] = count
+            people_state[room_id] = result["count"]
+            activity_state[room_id] = result["active_count"]
+            workout_state[room_id] = result["workout_count"]
 
         elapsed = time.time() - t0
         time.sleep(max(0, interval - elapsed))
@@ -108,7 +117,12 @@ async def broadcast_loop():
         if not connected_clients:
             continue
         with state_lock:
-            payload = json.dumps({"type": "people_update", "data": dict(people_state)})
+            payload = json.dumps({
+                "type": "people_update",
+                "data": dict(people_state),        # { room_id: count } (compatible interface)
+                "activity": dict(activity_state),  # { room_id: nb actifs } (nouveau, optionnel)
+                "workout": dict(workout_state),    # { room_id: nb en exercice } (nouveau, optionnel)
+            })
         dead = set()
         for ws in connected_clients:
             try:
@@ -121,13 +135,11 @@ async def broadcast_loop():
 # Lancement
 # ------------------------------------------------------------------
 async def main():
-    print("Chargement du modèle YOLO…")
-    model = YOLO(MODEL_PATH)
-    print("Modèle chargé ✅")
+    print("Préparation des détecteurs (modèle pose par pièce)…")
 
-    # Démarre un thread de détection par pièce
+    # Démarre un thread de détection par pièce (chacun son PeopleAnalyzer)
     for room in ROOMS:
-        t = threading.Thread(target=detection_thread, args=(room, model), daemon=True)
+        t = threading.Thread(target=detection_thread, args=(room,), daemon=True)
         t.start()
 
     # Serveur WebSocket

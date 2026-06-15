@@ -1,0 +1,5 @@
+# Config/état générés au runtime
+config.json
+cameras.json
+__pycache__/
+*.pyc

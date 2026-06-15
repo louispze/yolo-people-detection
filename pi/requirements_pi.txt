@@ -1,0 +1,8 @@
+# Dépendances pour Raspberry Pi Zero 2 W (compteur léger, SANS torch/ultralytics)
+# Conseil : préférer le paquet système opencv (plus rapide à installer sur Pi) :
+#     sudo apt install -y python3-opencv
+# puis n'installer ici que paho-mqtt si besoin.
+
+opencv-python-headless   # vision (headless = sans dépendances GUI, plus léger)
+numpy
+paho-mqtt                # optionnel : publication vers Home Assistant (MQTT)

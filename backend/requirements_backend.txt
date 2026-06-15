@@ -1,0 +1,24 @@
+# ============================================================================
+# Dépendances du backend FastAPI P2F Smart Home (à installer sur le Raspberry Pi)
+# ============================================================================
+# Installation :
+#     pip install -r requirements_backend.txt
+#
+# Le serveur DÉMARRE et SERT toujours, même sans le détecteur YOLO :
+# en l'absence d'ultralytics (ou de caméra), il bascule automatiquement sur
+# un générateur d'images de SUBSTITUTION. ultralytics est donc OPTIONNEL.
+
+fastapi
+uvicorn[standard]
+opencv-python
+numpy
+
+# --- OPTIONNEL : détection réelle de personnes / poses / exercices -----------
+# Décommente pour activer le mode "réel" (YOLO pose). Sur Raspberry Pi 4/5,
+# privilégie une version CPU de torch et un imgsz réduit (P2F_IMGSZ=320/480).
+# Sur Pi Zero 2 W, n'installe PAS ultralytics : utilise app/pi/counter_pi.py.
+#
+# ultralytics
+#
+# NB : ultralytics tire torch + torchvision (lourds). Le repli substitution
+# permet de développer/tester l'app sans rien de tout cela.
