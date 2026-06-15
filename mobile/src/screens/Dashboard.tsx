@@ -80,34 +80,32 @@ function RoomCard({
         </div>
       )}
 
-      {/* Consigne calculée + réglage de la base */}
+      {/* Consigne calculée (en haut) + réglage de la base (en dessous, tient dans la carte) */}
       <div
-        className="row between"
         style={{
           marginTop: "auto",
           paddingTop: 12,
           borderTop: "1px solid var(--border)",
-          alignItems: "center",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div>
-          <div className="row" style={{ gap: 5, color: "var(--accent)", fontWeight: 700 }}>
-            <Thermometer size={15} />
-            <span style={{ fontSize: 17 }}>{res.target.toFixed(1)}°C</span>
-          </div>
+        <div
+          className="row"
+          style={{ gap: 5, color: "var(--accent)", fontWeight: 700, marginBottom: 10 }}
+        >
+          <Thermometer size={15} />
+          <span style={{ fontSize: 17 }}>{res.target.toFixed(1)}°C</span>
           {penalty > 0 && (
-            <div className="muted small" style={{ marginTop: 2 }}>
-              base {res.base.toFixed(1)}° −{penalty.toFixed(1)}°
-            </div>
+            <span className="muted small" style={{ fontWeight: 400 }}>
+              (−{penalty.toFixed(1)}°)
+            </span>
           )}
         </div>
-        <Stepper
-          value={room.baseTarget}
-          step={0.5}
-          suffix="°"
-          onChange={(delta) => bumpBaseTarget(room.id, delta)}
-        />
+        <div className="row between" style={{ alignItems: "center" }}>
+          <button className="icon-btn" onClick={() => bumpBaseTarget(room.id, -0.5)}>−</button>
+          <span style={{ fontWeight: 700, fontSize: 15 }}>{room.baseTarget.toFixed(1)}°</span>
+          <button className="icon-btn" onClick={() => bumpBaseTarget(room.id, 0.5)}>+</button>
+        </div>
       </div>
     </div>
   );
