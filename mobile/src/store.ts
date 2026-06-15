@@ -33,12 +33,8 @@ function seedRooms(): Room[] {
     currentTemp, baseTarget, minTemp: 16, maxTemp: 26, map,
   });
   return [
-    mk("salon", "Salon", "Rez-de-chaussée", "sofa", 22.8, 22, { x: 4, y: 4, w: 46, h: 40 }),
-    mk("cuisine", "Cuisine", "Rez-de-chaussée", "kitchen", 21.3, 21, { x: 52, y: 4, w: 44, h: 28 }),
-    mk("chambre1", "Chambre 1", "Étage", "bed", 19.4, 20, { x: 4, y: 50, w: 44, h: 30 }),
-    mk("chambre2", "Chambre 2", "Étage", "bed", 18.9, 19, { x: 52, y: 50, w: 44, h: 30 }),
-    mk("bureau", "Bureau", "Étage", "desk", 20.1, 20, { x: 4, y: 82, w: 44, h: 14 }),
-    mk("sdb", "Salle de bain", "Étage", "bath", 23.5, 23, { x: 52, y: 82, w: 44, h: 14 }),
+    // Démo : une seule pièce, le Salon (= la webcam du Raspberry Pi)
+    mk("salon", "Salon", "Maison", "sofa", 22.0, 22, { x: 8, y: 8, w: 84, h: 80 }),
   ];
 }
 
@@ -51,13 +47,8 @@ function seedPeople(): Person[] {
 }
 
 function seedLights(): Light[] {
-  return [
-    { id: uid(), name: "Lampe salon", roomId: "salon", on: true, brightness: 70 },
-    { id: uid(), name: "Spots salon", roomId: "salon", on: true, brightness: 49 },
-    { id: uid(), name: "Cuisine", roomId: "cuisine", on: true, brightness: 100 },
-    { id: uid(), name: "Chambre 1", roomId: "chambre1", on: false, brightness: 0 },
-    { id: uid(), name: "Bureau", roomId: "bureau", on: false, brightness: 0 },
-  ];
+  // Pas de gestion de lumières dans cette démo (non pilotables)
+  return [];
 }
 
 const emptyLive = (): LiveRoomState => ({
@@ -194,7 +185,7 @@ export const useStore = create<AppState>((set, get) => {
     people: persisted.people ?? seedPeople(),
     lights: persisted.lights ?? seedLights(),
     climate: persisted.climate ?? DEFAULT_CLIMATE,
-    connection: persisted.connection ?? { host: "192.168.1.50", port: 8000, useTls: false },
+    connection: persisted.connection ?? { host: "192.168.1.44", port: 8000, useTls: false },
     demoMode: persisted.demoMode ?? true,
 
     screen: "dashboard",

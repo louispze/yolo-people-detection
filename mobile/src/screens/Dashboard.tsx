@@ -310,18 +310,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* 4) Lumières */}
-      <div className="section-label">Lumières</div>
-      {lights.length === 0 ? (
-        <Empty>Aucune lumière configurée.</Empty>
-      ) : (
-        <div className="grid" style={{ gap: 12 }}>
-          {lights.map((light) => (
-            <LightRow key={light.id} light={light} />
-          ))}
-        </div>
-      )}
-
       {/* 3) Détail pièce */}
       {openRoom && (
         <RoomSheet
